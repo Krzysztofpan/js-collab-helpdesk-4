@@ -1,77 +1,40 @@
-export const addTicketToList = (e) => {
-    e.preventDefault();
-    title = e.target.title.value
-    priority = e.target.priority.value
-    createTicket(title, priority)
-    filter.value = 'all'
-    box.innerHTML = tickets.map((ticket) => 
-        {
-            return (
-            `<div class="quest">
-                <p id="quest-title">${ticket.title}</p>
-                <p id="quest-priority">${ticket.priority}</p>
-                <select onchange="changeStatus(${ticket.id})" id="status" name="status" value="${ticket.status}">
-                    <option  value="new">new</option>
-                    <option  value="doing">doing</option>
-                    <option  value="done">done</option>
-                </select>
-            </div>`
-            )
-        }
-        ).join('')
-    e.target.title.value = ''
-    counter.innerHTML = `${tickets.length}/${tickets.length}`
-}
 
-const createTicket = (title, priority) => {
-    if (tickets.length >= 1000) {
-        alert('Maximum number of tickets reached')
-        return
-    }
-
-    title = title.trim()
+export const createTicket = (title, priority) => {
+    title = title.trim();
+    
     if (title.length < 3 || title.length > 80) {
-        alert('Title must be between 3 and 80 characters')
-        return
+        alert('Title must be between 3 and 80 characters');
+        return;
     }
 
-    const id = tickets.length + 1
-    tickets.push({ id, title, priority, status: 'new' })
-    return tickets[tickets.length - 1]
-}
+    const id = String(Math.random()).slice(2)
 
-const changeStatus = (id) => {
-    const status = document.querySelectorAll(`#status`)[id - 1].value
-    tickets[id - 1].status = status
+    const newTicket = {
+        id,
+        title,
+        priority,
+        status: 'new'
+    };
 
-}
+    return newTicket
+};
 
+export const changeTicketStatus = (tickets, id, newStatus) => {
+    const ticket = tickets.find(ticket => ticket.id === id);
 
-export const filterTickets = (e) => {
-    const filterValue = e.target.value
-    
-    filteredTickets = filterValue === 'all' ? tickets : tickets.filter((ticket) => ticket.status === filterValue)
-    console.log(filteredTickets);
+    if (!ticket) return;
 
-    if(filteredTickets.length) {
-        box.innerHTML = filteredTickets.map((ticket) => 
-        {
-            return (
-            `<div class="quest">
-                <p id="quest-title">${ticket.title}</p>
-                <p id="quest-priority">${ticket.priority}</p>
-               <select onchange="changeStatus(${ticket.id})" id="status" name="status">
-    <option value="new" ${ticket.status === 'new' ? 'selected' : ''}>new</option>
-    <option value="doing" ${ticket.status === 'doing' ? 'selected' : ''}>doing</option>
-    <option value="done" ${ticket.status === 'done' ? 'selected' : ''}>done</option>
-</select>
-            </div>`
-            )
-        }
-        ).join('')
-    } else {
-        box.innerHTML = "No matches elements"
+    ticket.status = newStatus;
+
+    return ticket
+};
+
+export const getFilteredTickets = (tickets) => {
+    const filterValue = filter.value;
+
+    if (filterValue === 'all') {
+        return tickets;
     }
-    
-    counter.innerHTML = `${filteredTickets.length}/${tickets.length}`
-}
+
+    return tickets.filter(ticket => ticket.status === filterValue);
+};
