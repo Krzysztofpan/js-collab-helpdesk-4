@@ -1,6 +1,8 @@
 import { changeTicketStatus, createTicket, getFilteredTickets } from "./actions.js";
 import { isValidTicket, jsonValidation } from "./helpers.js";
-let tickets = [];
+import { loadTickets, saveTickets } from "./localstorage.js";
+
+let tickets = loadTickets();
 
 const form = document.querySelector('#form');
 const box = document.querySelector('.box');
@@ -19,6 +21,7 @@ export const handleChangeStatus = (e) => {
 
     tickets = tickets.map((ticket) => ticket.id === changedTicket.id ? changedTicket : ticket)
     
+    saveTickets(tickets);
     renderTickets();
 }
 
@@ -39,16 +42,18 @@ export const handleAddTicket = (e) => {
         return;
     }
 
-    const newTicker = createTicket(title, priority);
+    const newTicket = createTicket(title, priority);
 
-    tickets.push(newTicker)
+    if (!newTicket) return;
+
+    tickets.push(newTicket)
 
     if (tickets.length > previousLength) {
         form.reset();
         filter.value = 'all';
     }
 
-    
+    saveTickets(tickets);
     renderTickets();
 }
 
@@ -119,6 +124,7 @@ export const handleSelectFile = async (e) => {
         }
 
         tickets = data
+        saveTickets(tickets);
     } catch (error) {
         console.error('Błąd parsowania JSON:', error);
     } finally {
@@ -153,6 +159,7 @@ export const handleGetPath = async () => {
         }
 
         tickets = data
+        saveTickets(tickets);
     } catch (error) {
         console.error('Błąd:', error);
     } finally {
