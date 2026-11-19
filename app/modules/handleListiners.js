@@ -1,10 +1,11 @@
 import { changeTicketStatus, createTicket, getFilteredTickets } from "./actions.js";
+import { isValidTicket, jsonValidation } from "./helpers.js";
 let tickets = [];
 
 const form = document.querySelector('#form');
 const box = document.querySelector('.box');
 const filter = document.querySelector('#filter');
-
+let isLockedScreen = false
 
 export const handleChangeStatus = (e) => {
     if (!e.target.matches('.status-select')) return;
@@ -24,6 +25,9 @@ export const handleChangeStatus = (e) => {
 
 export const handleAddTicket = (e) => {
     e.preventDefault();
+    if(isLockedScreen) {
+        return
+    }
 
     const title = e.target.title.value;
     const priority = e.target.priority.value;
@@ -44,6 +48,7 @@ export const handleAddTicket = (e) => {
         filter.value = 'all';
     }
 
+    
     renderTickets();
 }
 
@@ -86,3 +91,73 @@ export const renderTickets = () => {
 
     counter.textContent = `${filteredTickets.length}/${tickets.length}`;
 };
+
+
+export const handleSelectFile = async (e) => {
+    const file = e.target.files[0]
+    
+    console.log(file);
+    if (!file) return;
+    
+    isLockedScreen = true
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if(!Array.isArray(data)) {
+            throw new Error('Expected Array')
+        }
+
+        if(!data.every(ticket => ticket.id &&  isValidTicket(ticket))) {
+            throw new Error('Some ticket has invalid structure')
+        }
+
+        const validationResults = jsonValidation(data)
+
+        if(!validationResults.ok) {
+            throw new Error(validationResults.errorMessage)
+        }
+
+        tickets = data
+    } catch (error) {
+        console.error('Błąd parsowania JSON:', error);
+    } finally {
+      isLockedScreen = false
+    }
+
+    renderTickets();
+}
+
+export const handleGetPath = async () => {
+    
+    const path = prompt("Wpisz ścieżkę pliku")
+    
+    if(!path) return;
+
+    isLockedScreen = true
+    try {
+        const response = await fetch(path);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        jsonValidation(data)
+
+        const validationResults = jsonValidation(data)
+
+        if(!validationResults.ok) {
+            throw new Error(validationResults.errorMessage)
+        }
+
+        tickets = data
+    } catch (error) {
+        console.error('Błąd:', error);
+    } finally {
+      isLockedScreen = false
+    }
+
+     renderTickets();
+}
