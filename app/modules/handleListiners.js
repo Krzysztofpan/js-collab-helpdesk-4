@@ -1,6 +1,29 @@
 import { changeTicketStatus, createTicket, getFilteredTickets } from "./actions.js";
 import { isValidTicket, jsonValidation } from "./helpers.js";
-let tickets = [];
+const STORAGE_KEY = 'tickets';
+
+const loadTickets = () => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+
+        const data = JSON.parse(raw);
+        return jsonValidation(data).ok ? data : [];
+    } catch (error) {
+        console.error('Błąd odczytu localStorage:', error);
+        return [];
+    }
+};
+
+const saveTickets = () => {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+    } catch (error) {
+        console.error('Błąd zapisu do localStorage:', error);
+    }
+};
+
+let tickets = loadTickets();
 
 const form = document.querySelector('#form');
 const box = document.querySelector('.box');
@@ -19,6 +42,7 @@ export const handleChangeStatus = (e) => {
 
     tickets = tickets.map((ticket) => ticket.id === changedTicket.id ? changedTicket : ticket)
     
+    saveTickets();
     renderTickets();
 }
 
@@ -39,16 +63,18 @@ export const handleAddTicket = (e) => {
         return;
     }
 
-    const newTicker = createTicket(title, priority);
+    const newTicket = createTicket(title, priority);
 
-    tickets.push(newTicker)
+    if (!newTicket) return;
+
+    tickets.push(newTicket)
 
     if (tickets.length > previousLength) {
         form.reset();
         filter.value = 'all';
     }
 
-    
+    saveTickets();
     renderTickets();
 }
 
@@ -119,6 +145,7 @@ export const handleSelectFile = async (e) => {
         }
 
         tickets = data
+        saveTickets();
     } catch (error) {
         console.error('Błąd parsowania JSON:', error);
     } finally {
@@ -153,6 +180,7 @@ export const handleGetPath = async () => {
         }
 
         tickets = data
+        saveTickets();
     } catch (error) {
         console.error('Błąd:', error);
     } finally {
