@@ -16,3 +16,5 @@ triggerGetFileBtn.addEventListener('click',handleGetPath)
 form.addEventListener('submit', handleAddTicket);
 box.addEventListener('change', handleChangeStatus);
 filter.addEventListener('change', renderTickets);
+
+renderTickets();
