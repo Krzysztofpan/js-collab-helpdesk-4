@@ -1,39 +1,84 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta name="theme-color" content="#f4f2ec" />
+    <title>Dziennik questów</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="container">
-      <form id="form">
-      <label for="title">Tytuł questa: </label>
-      <input type="text" id="title" name="title" required />
-      <label for="priority">Wybierz priorytet: </label>
-      <select id="priority" name="priority" required>
-        <option value="low">Low</option>
-        <option value="medium">Normal</option>
-        <option value="high">High</option>
-      </select>
-      <button type="submit">Add</button>
-      </form>
-      <select id="filter" name="filter">
-          <option value="all">All</option>
-          <option value="new">New</option>
-          <option value="doing">Doing</option>
-          <option value="done">Done</option>
-      </select>
-      <span id="counter">
-      </span>
-      <input id="inputFile" type="file" placeholder="wybierz plik do importu" />
-      <button id="triggerGetFile">wskaż ścieżkę pliku do importu</button>
-    </div>
-    <div class="box-container">
-      <div class="box"></div>
-    </div>
+    <main class="page">
+      <header class="hero">
+        <div class="hero-copy">
+          <span class="hero-mark icon icon-compass" aria-hidden="true"></span>
+          <h1>Dziennik <em>questów</em></h1>
+          <p>Planuj zadania, ustalaj priorytety i śledź postępy.</p>
+        </div>
+        <div class="hero-dial" aria-hidden="true">
+          <span class="icon icon-compass"></span>
+        </div>
+      </header>
 
+      <div id="container">
+        <section class="panel compose" aria-labelledby="compose-title">
+          <div class="section-heading">
+            <span class="section-icon icon icon-plus" aria-hidden="true"></span>
+            <h2 id="compose-title">Nowy quest</h2>
+          </div>
+
+          <form id="form">
+            <label for="title">Tytuł</label>
+            <input type="text" id="title" name="title" placeholder="Co masz do zrobienia?" required />
+            <label for="priority">Priorytet</label>
+            <select id="priority" name="priority" required>
+              <option value="low">Niski</option>
+              <option value="medium">Normalny</option>
+              <option value="high">Wysoki</option>
+            </select>
+            <button class="primary" type="submit">
+              <span class="icon icon-plus" aria-hidden="true"></span>
+              Dodaj quest
+            </button>
+          </form>
+        </section>
+
+        <section class="panel import" aria-labelledby="import-title">
+          <div class="section-heading">
+            <span class="section-icon icon icon-import" aria-hidden="true"></span>
+            <h2 id="import-title">Import questów</h2>
+          </div>
+          <label class="visually-hidden" for="inputFile">Plik do importu</label>
+          <input id="inputFile" type="file" />
+          <button id="triggerGetFile" type="button">Wskaż ścieżkę pliku</button>
+        </section>
+
+        <section class="list-heading panel" aria-labelledby="list-title">
+          <div class="section-heading">
+            <span class="section-icon icon icon-list" aria-hidden="true"></span>
+            <h2 id="list-title">Twoje questy</h2>
+            <span id="counter" aria-live="polite"></span>
+          </div>
+          <div class="list-filter">
+            <label for="filter">Status</label>
+            <select id="filter" name="filter">
+              <option value="all">Wszystkie</option>
+              <option value="new">Nowe</option>
+              <option value="doing">W trakcie</option>
+              <option value="done">Ukończone</option>
+            </select>
+          </div>
+        </section>
+      </div>
+
+      <div class="list-body">
+        <div class="box-container"><div class="box"></div></div>
+        <div class="empty-state">
+          <span class="empty-icon icon icon-compass" aria-hidden="true"></span>
+          <p>Brak questów do wyświetlenia</p>
+        </div>
+      </div>
+    </main>
     <script type="module" src="./app.js"></script>
   </body>
 </html>

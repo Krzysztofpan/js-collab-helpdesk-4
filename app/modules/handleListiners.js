@@ -80,7 +80,7 @@ export const renderTickets = () => {
                         new
                     </option>
 
-                    <option value="doing"
+                    <option  value="doing"
                         ${ticket.status === 'doing' ? 'selected' : ''}>
                         doing
                     </option>
