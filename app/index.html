@@ -8,22 +8,24 @@
   </head>
   <body>
     <main>
+      <form id="form" aria-labelledby="ticket-form-title">
+        <h1 id="ticket-form-title">Nowe zgłoszenie</h1>
+        <label class="title-field" for="title">
+          Tytuł zgłoszenia
+          <input type="text" id="title" name="title" required />
+        </label>
+        <label for="priority">
+          Priorytet
+          <select id="priority" name="priority" required>
+            <option value="low">Low</option>
+            <option value="medium">Normal</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <button type="submit"><span aria-hidden="true">+</span> Dodaj zgłoszenie</button>
+      </form>
+
       <div class="toolbar">
-        <form id="form">
-          <label class="title-field" for="title">
-            Tytuł zgłoszenia
-            <input type="text" id="title" name="title" required />
-          </label>
-          <label for="priority">
-            Priorytet
-            <select id="priority" name="priority" required>
-              <option value="low">Low</option>
-              <option value="medium">Normal</option>
-              <option value="high">High</option>
-            </select>
-          </label>
-          <button type="submit">Dodaj zgłoszenie</button>
-        </form>
         <div class="board-controls">
           <label for="filter">
             Pokaż status

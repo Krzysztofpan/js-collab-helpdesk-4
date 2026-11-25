@@ -32,11 +32,23 @@ main {
 }
 
 #form {
-  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(8rem, 12rem) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 11rem) auto;
   align-items: end;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-block-end: 0.875rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid #c6d7ec;
+  border-radius: 0.875rem;
+  background: linear-gradient(110deg, #fff 40%, #edf4fc);
+  box-shadow: 0 2px 8px rgb(33 77 139 / 7%);
+}
+
+#ticket-form-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.25;
 }
 
 #form label {
@@ -85,10 +97,35 @@ button,
   font-weight: 600;
 }
 
+#form :is(input, select, button) {
+  min-height: 2.75rem;
+  border-radius: 0.5rem;
+}
+
 #form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
   border-color: #214d8b;
   background: #214d8b;
   color: #fff;
+}
+
+#form button span {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+#form button:hover:enabled {
+  border-color: #193d71;
+  background: #193d71;
+}
+
+#form button:disabled {
+  border-color: #526b8d;
+  background: #526b8d;
 }
 
 button:disabled,
@@ -238,5 +275,11 @@ input[type="file"]:disabled::file-selector-button {
 
   .board-column {
     min-height: 8rem;
+  }
+}
+
+@media (max-width: 23rem) {
+  #form {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
