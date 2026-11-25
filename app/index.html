@@ -9,10 +9,13 @@
   <body>
     <main>
       <form id="form" aria-labelledby="ticket-form-title">
-        <h1 id="ticket-form-title">Nowe zgłoszenie</h1>
+        <div class="ticket-form-heading">
+          <span class="ticket-form-icon" aria-hidden="true">+</span>
+          <h1 id="ticket-form-title">Nowe zgłoszenie</h1>
+        </div>
         <label class="title-field" for="title">
           Tytuł zgłoszenia
-          <input type="text" id="title" name="title" required />
+          <input type="text" id="title" name="title" placeholder="Np. Naprawić logowanie" required />
         </label>
         <label for="priority">
           Priorytet
@@ -22,7 +25,7 @@
             <option value="high">High</option>
           </select>
         </label>
-        <button type="submit"><span aria-hidden="true">+</span> Dodaj zgłoszenie</button>
+        <button type="submit">Dodaj zgłoszenie</button>
       </form>
 
       <div class="toolbar">
