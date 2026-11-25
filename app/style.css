@@ -146,6 +146,11 @@ input[type="file"]:disabled::file-selector-button {
   --status-color: #28765c;
 }
 
+.board-column.is-drop-target {
+  outline: 2px dashed var(--status-color);
+  outline-offset: -4px;
+}
+
 .board-column h2 {
   margin: 0 0 0.75rem;
   font-size: 1rem;
@@ -178,6 +183,15 @@ input[type="file"]:disabled::file-selector-button {
   overflow-wrap: anywhere;
   font-size: 0.9375rem;
   line-height: 1.4;
+}
+
+.quest[draggable="true"] {
+  cursor: grab;
+}
+
+.quest.is-dragging {
+  cursor: grabbing;
+  opacity: 0.55;
 }
 
 .quest-priority {

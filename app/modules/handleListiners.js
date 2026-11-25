@@ -13,21 +13,72 @@ const importError = document.querySelector("#importError")
 const inputFile = document.querySelector("#inputFile")
 const urlImportButton = document.querySelector("#triggerGetFile")
 let isImporting = false
+let draggedCard = null
+let dropTarget = null
 
-export const handleChangeStatus = (e) => {
-  if (isImporting || !e.target.matches(".status-select")) return
-
-  const id = e.target.dataset.id
-  const newStatus = e.target.value
-
-  const changedTicket = changeTicketStatus(tickets, id, newStatus)
-
-  if (!changedTicket) return
-
-  tickets = tickets.map((ticket) => (ticket.id === changedTicket.id ? changedTicket : ticket))
+function updateTicketStatus(id, newStatus) {
+  if (isImporting || !statusOptions.includes(newStatus)) return
+  if (!changeTicketStatus(tickets, id, newStatus)) return
 
   saveTickets(tickets)
   renderTickets()
+}
+
+export const handleChangeStatus = (e) => {
+  if (!e.target.matches(".status-select")) return
+  updateTicketStatus(e.target.closest(".quest").dataset.id, e.target.value)
+}
+
+function setDropTarget(column) {
+  if (dropTarget === column) return
+  dropTarget?.classList.remove("is-drop-target")
+  dropTarget = column
+  dropTarget?.classList.add("is-drop-target")
+}
+
+export function handleDragEnd() {
+  setDropTarget(null)
+  draggedCard?.classList.remove("is-dragging")
+  draggedCard = null
+}
+
+export function handleDragStart(e) {
+  const card = e.target.closest(".quest")
+  if (!card?.draggable || !e.dataTransfer) return
+
+  handleDragEnd()
+  draggedCard = card
+  card.classList.add("is-dragging")
+  e.dataTransfer.setData("application/x-helpdesk-ticket", card.dataset.id)
+  e.dataTransfer.effectAllowed = "move"
+}
+
+function getDropColumn(target) {
+  if (!draggedCard) return null
+
+  const column = target.closest(".board-column")
+  return column && column !== draggedCard.closest(".board-column") ? column : null
+}
+
+export function handleDragOver(e) {
+  const column = getDropColumn(e.target)
+  setDropTarget(column)
+  if (!column) return
+
+  e.preventDefault()
+  e.dataTransfer.dropEffect = "move"
+}
+
+export function handleDragLeave(e) {
+  if (dropTarget?.contains(e.target) && !dropTarget.contains(e.relatedTarget)) setDropTarget(null)
+}
+
+export function handleDrop(e) {
+  const column = getDropColumn(e.target)
+  if (!column) return
+
+  e.preventDefault()
+  updateTicketStatus(draggedCard.dataset.id, column.dataset.status)
 }
 
 export const handleAddTicket = (e) => {
@@ -60,6 +111,7 @@ export const handleAddTicket = (e) => {
 }
 
 export const renderTickets = () => {
+  handleDragEnd()
   const filterValue = filter.value
   const filteredTickets = getFilteredTickets(tickets, filterValue)
   const cardsByStatus = new Map(statusOptions.map((status) => [status, document.createDocumentFragment()]))
@@ -67,6 +119,8 @@ export const renderTickets = () => {
   for (const ticket of filteredTickets) {
     const card = document.createElement("article")
     card.className = "quest"
+    card.dataset.id = ticket.id
+    card.draggable = !isImporting && filterValue === "all"
 
     const title = document.createElement("h3")
     title.className = "quest-title"
@@ -81,7 +135,6 @@ export const renderTickets = () => {
     status.className = "status-select"
     status.append(...statusOptions.map((value) => new Option(value, value)))
     status.setAttribute("aria-label", `Status zgłoszenia: ${ticket.title}`)
-    status.dataset.id = ticket.id
     status.value = ticket.status
     status.disabled = isImporting
 
@@ -101,11 +154,13 @@ export const renderTickets = () => {
 }
 
 function setImporting(importing) {
+  if (importing) handleDragEnd()
   isImporting = importing
   inputFile.disabled = importing
   urlImportButton.disabled = importing
   for (const control of form.elements) control.disabled = importing
   for (const status of board.querySelectorAll(".status-select")) status.disabled = importing
+  for (const card of board.querySelectorAll(".quest")) card.draggable = !importing && filter.value === "all"
 }
 
 async function replaceTickets(load) {
