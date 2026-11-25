@@ -3,27 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b111b" />
     <title>Helpdesk</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main>
+    <header class="site-header">
+      <div class="shell wordmark">
+        <span class="wordmark-icon" aria-hidden="true">&gt;_</span>
+        Helpdesk<span class="wordmark-accent" aria-hidden="true">.</span>
+      </div>
+    </header>
+
+    <main class="shell">
+      <div class="hero">
+        <div class="hero-content">
+          <p class="hero-theme">Programowanie <span>/</span> AI</p>
+          <h1 id="board-title">Tablica zgłoszeń</h1>
+        </div>
+      </div>
+
+      <form id="form" aria-labelledby="ticket-form-title">
+        <div class="ticket-form-heading">
+          <span class="ticket-form-icon" aria-hidden="true">+</span>
+          <h2 id="ticket-form-title">Nowe zgłoszenie</h2>
+        </div>
+        <label class="title-field" for="title">
+          Tytuł zgłoszenia
+          <input type="text" id="title" name="title" placeholder="Np. Dodać testy dla modelu" required />
+        </label>
+        <label for="priority">
+          Priorytet
+          <select id="priority" name="priority" required>
+            <option value="low">Low</option>
+            <option value="medium">Normal</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <button type="submit">Dodaj zgłoszenie</button>
+      </form>
+
       <div class="toolbar">
-        <form id="form">
-          <label class="title-field" for="title">
-            Tytuł zgłoszenia
-            <input type="text" id="title" name="title" required />
-          </label>
-          <label for="priority">
-            Priorytet
-            <select id="priority" name="priority" required>
-              <option value="low">Low</option>
-              <option value="medium">Normal</option>
-              <option value="high">High</option>
-            </select>
-          </label>
-          <button type="submit">Dodaj zgłoszenie</button>
-        </form>
         <div class="board-controls">
           <label for="filter">
             Pokaż status
@@ -37,13 +57,16 @@
           <output id="counter" aria-label="Widoczne zgłoszenia / wszystkie zgłoszenia"></output>
         </div>
         <div class="import-controls">
-          <input id="inputFile" type="file" accept=".json,.csv,.xml,application/json,text/csv,application/csv,text/xml,application/xml" aria-label="Importuj plik JSON, CSV lub XML" />
+          <label class="file-control">
+            <input id="inputFile" type="file" accept=".json,.csv,.xml,application/json,text/csv,application/csv,text/xml,application/xml" aria-label="Importuj plik JSON, CSV lub XML" />
+            <span>Importuj plik</span>
+          </label>
           <button type="button" id="triggerGetFile">Importuj z adresu</button>
         </div>
         <p id="importError" role="status"></p>
       </div>
 
-      <section class="board" aria-label="Tablica zgłoszeń">
+      <section class="board" aria-labelledby="board-title">
         <section class="board-column" data-status="new" aria-labelledby="new-heading">
           <h2 id="new-heading">New</h2>
           <div class="board-cards"></div>
