@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tickets>
+  <ticket>
+    <id>xml-1</id>
+    <title>Poproś AI o test, który sprawdza coś poza samym sobą</title>
+    <priority>medium</priority>
+    <status>new</status>
+  </ticket>
+  <ticket>
+    <id>xml-2</id>
+    <title>Odzyskaj pętlę for, zanim AI przerobi ją na trzy mikroserwisy</title>
+    <priority>high</priority>
+    <status>doing</status>
+  </ticket>
+  <ticket>
+    <id>xml-3</id>
+    <title>Testy &amp; AI: oboje twierdzą, że u nich działa</title>
+    <priority>low</priority>
+    <status>done</status>
+  </ticket>
+</tickets>
