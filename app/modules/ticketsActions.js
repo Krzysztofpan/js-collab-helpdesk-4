@@ -27,7 +27,7 @@ export const getFilteredTickets = (tickets, filterValue) => {
     return tickets
   }
 
-  return tickets.filter((ticket) => ticket.status === filterValue)
+  return tickets.filter((ticket) => ticket.priority === filterValue)
 }
 
 export const createTicket = (title, priority) => {
@@ -50,12 +50,10 @@ export const createTicket = (title, priority) => {
   return newTicket
 }
 
-export const changeTicketStatus = (tickets, id, newStatus) => {
+export const updateTicket = (tickets, id, changes) => {
   const ticket = tickets.find((ticket) => String(ticket.id) === id)
 
   if (!ticket) return
 
-  ticket.status = newStatus
-
-  return ticket
+  return Object.assign(ticket, changes)
 }
