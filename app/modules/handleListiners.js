@@ -5,7 +5,8 @@ import { importFromFile, importFromUrl } from "./importTickets.js"
 let tickets = loadTickets()
 
 const form = document.querySelector("#form")
-const box = document.querySelector(".box")
+const board = document.querySelector(".board")
+const columns = board.querySelectorAll(".board-column")
 const filter = document.querySelector("#filter")
 const counter = document.querySelector("#counter")
 const importError = document.querySelector("#importError")
@@ -59,35 +60,41 @@ export const handleAddTicket = (e) => {
 }
 
 export const renderTickets = () => {
-  const filteredTickets = getFilteredTickets(tickets)
+  const filterValue = filter.value
+  const filteredTickets = getFilteredTickets(tickets, filterValue)
+  const cardsByStatus = new Map(statusOptions.map((status) => [status, document.createDocumentFragment()]))
 
-  if (filteredTickets.length === 0) {
-    box.textContent = "No matching elements"
-  } else {
-    const rows = document.createDocumentFragment()
-    for (const ticket of filteredTickets) {
-      const row = document.createElement("div")
-      row.className = "quest"
+  for (const ticket of filteredTickets) {
+    const card = document.createElement("article")
+    card.className = "quest"
 
-      const title = document.createElement("p")
-      title.className = "quest-title"
-      title.textContent = ticket.title
+    const title = document.createElement("h3")
+    title.className = "quest-title"
+    title.textContent = ticket.title
 
-      const priority = document.createElement("p")
-      priority.className = "quest-priority"
-      priority.textContent = ticket.priority
+    const priority = document.createElement("p")
+    priority.className = "quest-priority"
+    priority.dataset.priority = ticket.priority
+    priority.textContent = ticket.priority
 
-      const status = document.createElement("select")
-      status.className = "status-select"
-      status.append(...statusOptions.map((value) => new Option(value, value)))
-      status.dataset.id = ticket.id
-      status.value = ticket.status
-      status.disabled = isImporting
+    const status = document.createElement("select")
+    status.className = "status-select"
+    status.append(...statusOptions.map((value) => new Option(value, value)))
+    status.setAttribute("aria-label", `Status zgłoszenia: ${ticket.title}`)
+    status.dataset.id = ticket.id
+    status.value = ticket.status
+    status.disabled = isImporting
 
-      row.append(title, priority, status)
-      rows.append(row)
-    }
-    box.replaceChildren(rows)
+    card.append(title, priority, status)
+    cardsByStatus.get(ticket.status).append(card)
+  }
+
+  for (const column of columns) {
+    const status = column.dataset.status
+    const cards = cardsByStatus.get(status)
+    column.hidden = filterValue !== "all" && filterValue !== status
+    column.querySelector(".board-empty").hidden = cards.hasChildNodes()
+    column.querySelector(".board-cards").replaceChildren(cards)
   }
 
   counter.textContent = `${filteredTickets.length}/${tickets.length}`
@@ -98,7 +105,7 @@ function setImporting(importing) {
   inputFile.disabled = importing
   urlImportButton.disabled = importing
   for (const control of form.elements) control.disabled = importing
-  for (const status of box.querySelectorAll(".status-select")) status.disabled = importing
+  for (const status of board.querySelectorAll(".status-select")) status.disabled = importing
 }
 
 async function replaceTickets(load) {

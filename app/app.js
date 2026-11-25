@@ -2,7 +2,7 @@ import { handleAddTicket, handleChangeStatus, handleGetPath, handleSelectFile, r
 
 
 const form = document.querySelector('#form');
-const box = document.querySelector('.box');
+const board = document.querySelector('.board');
 const filter = document.querySelector('#filter');
 const inputFile = document.querySelector('#inputFile')
 const triggerGetFileBtn = document.querySelector('#triggerGetFile')
@@ -14,7 +14,7 @@ triggerGetFileBtn.addEventListener('click',handleGetPath)
 
 
 form.addEventListener('submit', handleAddTicket);
-box.addEventListener('change', handleChangeStatus);
+board.addEventListener('change', handleChangeStatus);
 filter.addEventListener('change', renderTickets);
 
 renderTickets();
