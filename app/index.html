@@ -27,9 +27,10 @@
       </select>
       <span id="counter">
       </span>
-      <input id="inputFile" type="file" placeholder="wybierz plik do importu" />
+      <input id="inputFile" type="file" accept=".json,.csv,.xml,application/json,text/csv,application/csv,text/xml,application/xml" aria-label="Importuj plik JSON, CSV lub XML" />
       <button id="triggerGetFile">wskaż ścieżkę pliku do importu</button>
     </div>
+    <p id="importError" role="status"></p>
     <div class="box-container">
       <div class="box"></div>
     </div>

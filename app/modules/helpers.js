@@ -1,27 +1,27 @@
-import { priorityOptions, statusOptions } from "./constants.js"
+import { MAX_TICKETS, priorityOptions, statusOptions } from './constants.js';
 
+function isValidTicket(ticket) {
+    if (!ticket || typeof ticket !== 'object') return false;
 
-
-export const jsonValidation = (data) => {
-    if(!Array.isArray(data)) {
-        return {ok: false, errorMessage: 'Expected Array'}
-    }
-
-    if(!data.every(ticket => ticket.id &&  isValidTicket(ticket))) {
-        return  {ok: false, errorMessage: 'Some ticket has invalid structure'}
-    }
-
-    return {ok: true}
+    const validId = (typeof ticket.id === 'string' && ticket.id.trim() !== '') ||
+        Number.isFinite(ticket.id);
+    return validId && typeof ticket.title === 'string' && ticket.title.trim() !== '' &&
+        priorityOptions.includes(ticket.priority) && statusOptions.includes(ticket.status);
 }
 
-export const isValidTicket = (ticket) => {
-    if(!ticket['id'] && !ticket['title']) return false
+export function validateTickets(tickets) {
+    if (!Array.isArray(tickets)) return { ok: false, errorMessage: 'Oczekiwano listy zgłoszeń.' };
+    if (tickets.length > MAX_TICKETS) {
+        return { ok: false, errorMessage: `Maksymalna liczba zgłoszeń to ${MAX_TICKETS}.` };
+    }
+    if (!tickets.every(isValidTicket)) {
+        return { ok: false, errorMessage: 'Co najmniej jedno zgłoszenie ma nieprawidłowe dane.' };
+    }
 
-    if(!ticket['priority'] && !priorityOptions.some(ticket.priority)) 
-        return false
+    const ids = new Set(tickets.map(ticket => String(ticket.id)));
+    if (ids.size !== tickets.length) {
+        return { ok: false, errorMessage: 'Identyfikatory zgłoszeń muszą być unikalne.' };
+    }
 
-    if(!ticket['status'] && !statusOptions.some(ticket.status)) 
-        return false
-
-    return true
+    return { ok: true };
 }

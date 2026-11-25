@@ -1,5 +1,6 @@
 import { changeTicketStatus, createTicket, getFilteredTickets } from "./actions.js";
-import { isValidTicket, jsonValidation } from "./helpers.js";
+import { MAX_TICKETS, statusOptions } from "./constants.js";
+import { importFromFile, importFromUrl } from "./importTickets.js";
 import { loadTickets, saveTickets } from "./localstorage.js";
 
 let tickets = loadTickets();
@@ -7,10 +8,14 @@ let tickets = loadTickets();
 const form = document.querySelector('#form');
 const box = document.querySelector('.box');
 const filter = document.querySelector('#filter');
-let isLockedScreen = false
+const counter = document.querySelector('#counter');
+const importError = document.querySelector('#importError');
+const inputFile = document.querySelector('#inputFile');
+const urlImportButton = document.querySelector('#triggerGetFile');
+let isImporting = false;
 
 export const handleChangeStatus = (e) => {
-    if (!e.target.matches('.status-select')) return;
+    if (isImporting || !e.target.matches('.status-select')) return;
 
     const id = e.target.dataset.id
     const newStatus = e.target.value;
@@ -28,16 +33,14 @@ export const handleChangeStatus = (e) => {
 
 export const handleAddTicket = (e) => {
     e.preventDefault();
-    if(isLockedScreen) {
-        return
-    }
+    if (isImporting) return;
 
     const title = e.target.title.value;
     const priority = e.target.priority.value;
 
     const previousLength = tickets.length;
 
-    if (tickets.length >= 1000) {
+    if (tickets.length >= MAX_TICKETS) {
         alert('Maximum number of tickets reached');
         return;
     }
@@ -61,110 +64,71 @@ export const renderTickets = () => {
     const filteredTickets = getFilteredTickets(tickets);
 
     if (filteredTickets.length === 0) {
-        box.innerHTML = 'No matching elements';
+        box.textContent = 'No matching elements';
     } else {
-        box.innerHTML = filteredTickets.map(ticket => `
-            <div class="quest">
-                <p class="quest-title">${ticket.title}</p>
+        const rows = document.createDocumentFragment();
+        for (const ticket of filteredTickets) {
+            const row = document.createElement('div');
+            row.className = 'quest';
 
-                <p class="quest-priority">
-                    ${ticket.priority}
-                </p>
+            const title = document.createElement('p');
+            title.className = 'quest-title';
+            title.textContent = ticket.title;
 
-                <select
-                    class="status-select"
-                    data-id="${ticket.id}"
-                >
-                    <option value="new"
-                        ${ticket.status === 'new' ? 'selected' : ''}>
-                        new
-                    </option>
+            const priority = document.createElement('p');
+            priority.className = 'quest-priority';
+            priority.textContent = ticket.priority;
 
-                    <option value="doing"
-                        ${ticket.status === 'doing' ? 'selected' : ''}>
-                        doing
-                    </option>
+            const status = document.createElement('select');
+            status.className = 'status-select';
+            status.append(...statusOptions.map(value => new Option(value, value)));
+            status.dataset.id = ticket.id;
+            status.value = ticket.status;
+            status.disabled = isImporting;
 
-                    <option value="done"
-                        ${ticket.status === 'done' ? 'selected' : ''}>
-                        done
-                    </option>
-                </select>
-            </div>
-        `).join('');
+            row.append(title, priority, status);
+            rows.append(row);
+        }
+        box.replaceChildren(rows);
     }
 
     counter.textContent = `${filteredTickets.length}/${tickets.length}`;
 };
 
-
-export const handleSelectFile = async (e) => {
-    const file = e.target.files[0]
-    
-    console.log(file);
-    if (!file) return;
-    
-    isLockedScreen = true
-    try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-
-        if(!Array.isArray(data)) {
-            throw new Error('Expected Array')
-        }
-
-        if(!data.every(ticket => ticket.id &&  isValidTicket(ticket))) {
-            throw new Error('Some ticket has invalid structure')
-        }
-
-        const validationResults = jsonValidation(data)
-
-        if(!validationResults.ok) {
-            throw new Error(validationResults.errorMessage)
-        }
-
-        tickets = data
-        saveTickets(tickets);
-    } catch (error) {
-        console.error('Błąd parsowania JSON:', error);
-    } finally {
-      isLockedScreen = false
-    }
-
-    renderTickets();
+function setImporting(importing) {
+    isImporting = importing;
+    inputFile.disabled = importing;
+    urlImportButton.disabled = importing;
+    for (const control of form.elements) control.disabled = importing;
+    for (const status of box.querySelectorAll('.status-select')) status.disabled = importing;
 }
 
-export const handleGetPath = async () => {
-    
-    const path = prompt("Wpisz ścieżkę pliku")
-    
-    if(!path) return;
+async function replaceTickets(load) {
+    if (!confirm('Zastąpić bieżącą listę zgłoszeń danymi z importu?')) return;
 
-    isLockedScreen = true
+    importError.textContent = '';
+    setImporting(true);
     try {
-        const response = await fetch(path);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        jsonValidation(data)
-
-        const validationResults = jsonValidation(data)
-
-        if(!validationResults.ok) {
-            throw new Error(validationResults.errorMessage)
-        }
-
-        tickets = data
+        tickets = await load();
         saveTickets(tickets);
+        renderTickets();
     } catch (error) {
-        console.error('Błąd:', error);
+        importError.textContent = `Błąd importu: ${error.message}`;
     } finally {
-      isLockedScreen = false
+        setImporting(false);
     }
-
-     renderTickets();
 }
+
+export const handleSelectFile = (e) => {
+    const input = e.currentTarget;
+    const file = input.files[0];
+    input.value = '';
+    if (file && !isImporting) return replaceTickets(() => importFromFile(file));
+};
+
+export const handleGetPath = () => {
+    if (isImporting) return;
+
+    const path = prompt('Wpisz ścieżkę do pliku JSON, CSV lub XML')?.trim();
+    if (path) return replaceTickets(() => importFromUrl(path));
+};

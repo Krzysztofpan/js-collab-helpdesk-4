@@ -20,7 +20,7 @@ export const createTicket = (title, priority) => {
 };
 
 export const changeTicketStatus = (tickets, id, newStatus) => {
-    const ticket = tickets.find(ticket => ticket.id === id);
+    const ticket = tickets.find(ticket => String(ticket.id) === id);
 
     if (!ticket) return;
 

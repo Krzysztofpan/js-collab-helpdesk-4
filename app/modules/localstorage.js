@@ -1,5 +1,5 @@
 import { STORAGE_KEY } from "./constants.js";
-import { jsonValidation } from "./helpers.js";
+import { validateTickets } from "./helpers.js";
 
 export const loadTickets = () => {
     try {
@@ -7,7 +7,7 @@ export const loadTickets = () => {
         if (!raw) return [];
 
         const data = JSON.parse(raw);
-        return jsonValidation(data).ok ? data : [];
+        return validateTickets(data).ok ? data : [];
     } catch (error) {
         console.error('Błąd odczytu localStorage:', error);
         return [];
