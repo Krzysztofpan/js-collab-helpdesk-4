@@ -5,28 +5,80 @@ import { importFromFile, importFromUrl } from "./importTickets.js"
 let tickets = loadTickets()
 
 const form = document.querySelector("#form")
-const box = document.querySelector(".box")
+const board = document.querySelector(".board")
+const columns = board.querySelectorAll(".board-column")
 const filter = document.querySelector("#filter")
 const counter = document.querySelector("#counter")
 const importError = document.querySelector("#importError")
 const inputFile = document.querySelector("#inputFile")
 const urlImportButton = document.querySelector("#triggerGetFile")
 let isImporting = false
+let draggedCard = null
+let dropTarget = null
 
-export const handleChangeStatus = (e) => {
-  if (isImporting || !e.target.matches(".status-select")) return
-
-  const id = e.target.dataset.id
-  const newStatus = e.target.value
-
-  const changedTicket = changeTicketStatus(tickets, id, newStatus)
-
-  if (!changedTicket) return
-
-  tickets = tickets.map((ticket) => (ticket.id === changedTicket.id ? changedTicket : ticket))
+function updateTicketStatus(id, newStatus) {
+  if (isImporting || !statusOptions.includes(newStatus)) return
+  if (!changeTicketStatus(tickets, id, newStatus)) return
 
   saveTickets(tickets)
   renderTickets()
+}
+
+export const handleChangeStatus = (e) => {
+  if (!e.target.matches(".status-select")) return
+  updateTicketStatus(e.target.closest(".quest").dataset.id, e.target.value)
+}
+
+function setDropTarget(column) {
+  if (dropTarget === column) return
+  dropTarget?.classList.remove("is-drop-target")
+  dropTarget = column
+  dropTarget?.classList.add("is-drop-target")
+}
+
+export function handleDragEnd() {
+  setDropTarget(null)
+  draggedCard?.classList.remove("is-dragging")
+  draggedCard = null
+}
+
+export function handleDragStart(e) {
+  const card = e.target.closest(".quest")
+  if (!card?.draggable || !e.dataTransfer) return
+
+  handleDragEnd()
+  draggedCard = card
+  card.classList.add("is-dragging")
+  e.dataTransfer.setData("application/x-helpdesk-ticket", card.dataset.id)
+  e.dataTransfer.effectAllowed = "move"
+}
+
+function getDropColumn(target) {
+  if (!draggedCard) return null
+
+  const column = target.closest(".board-column")
+  return column && column !== draggedCard.closest(".board-column") ? column : null
+}
+
+export function handleDragOver(e) {
+  const column = getDropColumn(e.target)
+  setDropTarget(column)
+  if (!column) return
+
+  e.preventDefault()
+  e.dataTransfer.dropEffect = "move"
+}
+
+export function handleDragLeave(e) {
+  if (dropTarget?.contains(e.target) && !dropTarget.contains(e.relatedTarget)) setDropTarget(null)
+}
+
+export function handleDrop(e) {
+  const column = getDropColumn(e.target)
+  if (!column) return
+
+  e.preventDefault()
+  updateTicketStatus(draggedCard.dataset.id, column.dataset.status)
 }
 
 export const handleAddTicket = (e) => {
@@ -59,46 +111,56 @@ export const handleAddTicket = (e) => {
 }
 
 export const renderTickets = () => {
-  const filteredTickets = getFilteredTickets(tickets)
+  handleDragEnd()
+  const filterValue = filter.value
+  const filteredTickets = getFilteredTickets(tickets, filterValue)
+  const cardsByStatus = new Map(statusOptions.map((status) => [status, document.createDocumentFragment()]))
 
-  if (filteredTickets.length === 0) {
-    box.textContent = "No matching elements"
-  } else {
-    const rows = document.createDocumentFragment()
-    for (const ticket of filteredTickets) {
-      const row = document.createElement("div")
-      row.className = "quest"
+  for (const ticket of filteredTickets) {
+    const card = document.createElement("article")
+    card.className = "quest"
+    card.dataset.id = ticket.id
+    card.draggable = !isImporting && filterValue === "all"
 
-      const title = document.createElement("p")
-      title.className = "quest-title"
-      title.textContent = ticket.title
+    const title = document.createElement("h3")
+    title.className = "quest-title"
+    title.textContent = ticket.title
 
-      const priority = document.createElement("p")
-      priority.className = "quest-priority"
-      priority.textContent = ticket.priority
+    const priority = document.createElement("p")
+    priority.className = "quest-priority"
+    priority.dataset.priority = ticket.priority
+    priority.textContent = ticket.priority
 
-      const status = document.createElement("select")
-      status.className = "status-select"
-      status.append(...statusOptions.map((value) => new Option(value, value)))
-      status.dataset.id = ticket.id
-      status.value = ticket.status
-      status.disabled = isImporting
+    const status = document.createElement("select")
+    status.className = "status-select"
+    status.append(...statusOptions.map((value) => new Option(value, value)))
+    status.setAttribute("aria-label", `Status zgłoszenia: ${ticket.title}`)
+    status.value = ticket.status
+    status.disabled = isImporting
 
-      row.append(title, priority, status)
-      rows.append(row)
-    }
-    box.replaceChildren(rows)
+    card.append(title, priority, status)
+    cardsByStatus.get(ticket.status).append(card)
+  }
+
+  for (const column of columns) {
+    const status = column.dataset.status
+    const cards = cardsByStatus.get(status)
+    column.hidden = filterValue !== "all" && filterValue !== status
+    column.querySelector(".board-empty").hidden = cards.hasChildNodes()
+    column.querySelector(".board-cards").replaceChildren(cards)
   }
 
   counter.textContent = `${filteredTickets.length}/${tickets.length}`
 }
 
 function setImporting(importing) {
+  if (importing) handleDragEnd()
   isImporting = importing
   inputFile.disabled = importing
   urlImportButton.disabled = importing
   for (const control of form.elements) control.disabled = importing
-  for (const status of box.querySelectorAll(".status-select")) status.disabled = importing
+  for (const status of board.querySelectorAll(".status-select")) status.disabled = importing
+  for (const card of board.querySelectorAll(".quest")) card.draggable = !importing && filter.value === "all"
 }
 
 async function replaceTickets(load) {

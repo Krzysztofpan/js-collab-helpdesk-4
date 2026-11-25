@@ -22,9 +22,7 @@ export const saveTickets = (tickets) => {
   }
 }
 
-export const getFilteredTickets = (tickets) => {
-  const filterValue = filter.value
-
+export const getFilteredTickets = (tickets, filterValue) => {
   if (filterValue === "all") {
     return tickets
   }
