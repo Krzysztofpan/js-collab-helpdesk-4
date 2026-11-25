@@ -1,0 +1,4 @@
+id,title,priority,status
+demo-1,"Znajdź pakiet npm, który AI właśnie wymyśliła",low,new
+demo-2,"Popraw literówkę. AI zdążyła już zmienić 47 plików",high,doing
+demo-3,"Ustal, który z dwóch botów na review jest seniorem",medium,done

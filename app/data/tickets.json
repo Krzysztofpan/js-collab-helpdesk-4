@@ -1,0 +1,20 @@
+[
+  {
+    "id": "json-1",
+    "title": "Odszukaj błąd, który AI naprawiła, usuwając komunikat",
+    "priority": "high",
+    "status": "new"
+  },
+  {
+    "id": "json-2",
+    "title": "Przekonaj AI, że „zrestartuj serwer” to nie refaktoryzacja",
+    "priority": "medium",
+    "status": "doing"
+  },
+  {
+    "id": "json-3",
+    "title": "Policz, ile razy AI napisała „teraz już na pewno działa”",
+    "priority": "low",
+    "status": "done"
+  }
+]
