@@ -2,8 +2,8 @@ export const priorityOptions = ['low', 'medium', 'high']
 
 export const priorityIcons = {
     low: '↓',
-    medium: '↑',
-    high: '↑↑'
+    medium: '→',
+    high: '↑'
 };
 
 export const statusOptions = ['new', 'doing', 'done']
