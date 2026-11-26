@@ -1,6 +1,6 @@
 import {
     handleAddTicket,
-    handleChangeTicket,
+    handleChangeStatus,
     handleDragEnd,
     handleDragLeave,
     handleDragOver,
@@ -30,7 +30,7 @@ triggerGetFileBtn.addEventListener('click',handleGetPath)
 
 
 form.addEventListener('submit', handleAddTicket);
-board.addEventListener('change', handleChangeTicket);
+board.addEventListener('change', handleChangeStatus);
 board.addEventListener('dragstart', handleDragStart);
 board.addEventListener('dragover', handleDragOver);
 board.addEventListener('dragleave', handleDragLeave);
