@@ -433,6 +433,9 @@ input:disabled,
 }
 
 .quest-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   justify-self: start;
   margin: 0;
   padding: 0.125rem 0.5rem;
@@ -443,6 +446,11 @@ input:disabled,
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.5;
+}
+
+.priority-icon {
+  font-size: 1.25em;
+  font-weight: bold;
 }
 
 .quest-priority[data-priority="medium"] {

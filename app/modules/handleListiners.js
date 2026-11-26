@@ -1,5 +1,5 @@
 import { changeTicketStatus, createTicket, getFilteredTickets, loadTickets, saveTickets } from "./ticketsActions.js"
-import { MAX_TICKETS, statusOptions } from "./constants.js"
+import { MAX_TICKETS, priorityIcons, statusOptions } from "./constants.js"
 import { importFromFile, importFromUrl } from "./importTickets.js"
 
 let tickets = loadTickets()
@@ -129,7 +129,11 @@ export const renderTickets = () => {
     const priority = document.createElement("p")
     priority.className = "quest-priority"
     priority.dataset.priority = ticket.priority
-    priority.textContent = ticket.priority
+    const priorityIcon = document.createElement("span")
+    priorityIcon.className = "priority-icon"
+    priorityIcon.setAttribute("aria-hidden", "true")
+    priorityIcon.textContent = priorityIcons[ticket.priority] ?? ""
+    priority.append(priorityIcon, document.createTextNode(ticket.priority))
 
     const status = document.createElement("select")
     status.className = "status-select"
