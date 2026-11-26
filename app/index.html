@@ -46,12 +46,12 @@
       <div class="toolbar">
         <div class="board-controls">
           <label for="filter">
-            Pokaż status
+            Pokaż priorytet
             <select id="filter" name="filter">
               <option value="all">Wszystkie</option>
-              <option value="new">New</option>
-              <option value="doing">Doing</option>
-              <option value="done">Done</option>
+              <option value="high">High</option>
+              <option value="medium">Normal</option>
+              <option value="low">Low</option>
             </select>
           </label>
           <output id="counter" aria-label="Widoczne zgłoszenia / wszystkie zgłoszenia"></output>
@@ -67,18 +67,18 @@
       </div>
 
       <section class="board" aria-labelledby="board-title">
-        <section class="board-column" data-status="new" aria-labelledby="new-heading">
-          <h2 id="new-heading">New</h2>
+        <section class="board-column" data-priority="high" aria-labelledby="high-heading">
+          <h2 id="high-heading">High</h2>
           <div class="board-cards"></div>
           <p class="board-empty">Brak zgłoszeń</p>
         </section>
-        <section class="board-column" data-status="doing" aria-labelledby="doing-heading">
-          <h2 id="doing-heading">Doing</h2>
+        <section class="board-column" data-priority="medium" aria-labelledby="medium-heading">
+          <h2 id="medium-heading">Normal</h2>
           <div class="board-cards"></div>
           <p class="board-empty">Brak zgłoszeń</p>
         </section>
-        <section class="board-column" data-status="done" aria-labelledby="done-heading">
-          <h2 id="done-heading">Done</h2>
+        <section class="board-column" data-priority="low" aria-labelledby="low-heading">
+          <h2 id="low-heading">Low</h2>
           <div class="board-cards"></div>
           <p class="board-empty">Brak zgłoszeń</p>
         </section>
