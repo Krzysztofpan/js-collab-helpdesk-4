@@ -10,6 +10,7 @@ import {
     handleSelectFile,
     renderTickets,
 } from "./modules/handleListiners.js";
+import { priorityIcons } from "./modules/constants.js";
 
 
 const form = document.querySelector('#form');
@@ -17,6 +18,10 @@ const board = document.querySelector('.board');
 const filter = document.querySelector('#filter');
 const inputFile = document.querySelector('#inputFile')
 const triggerGetFileBtn = document.querySelector('#triggerGetFile')
+
+for (const option of form.querySelector('#priority').options) {
+    option.textContent = `${priorityIcons[option.value]} ${option.textContent}`;
+}
 
 
 inputFile.addEventListener('change', handleSelectFile)
