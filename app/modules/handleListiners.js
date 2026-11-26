@@ -1,5 +1,5 @@
-import { changeTicketStatus, createTicket, getFilteredTickets, loadTickets, saveTickets } from "./ticketsActions.js"
-import { MAX_TICKETS, priorityIcons, statusOptions } from "./constants.js"
+import { createTicket, getFilteredTickets, loadTickets, saveTickets, updateTicket } from "./ticketsActions.js"
+import { MAX_TICKETS, priorityOptions, statusOptions } from "./constants.js"
 import { importFromFile, importFromUrl } from "./importTickets.js"
 
 let tickets = loadTickets()
@@ -16,17 +16,34 @@ let isImporting = false
 let draggedCard = null
 let dropTarget = null
 
-function updateTicketStatus(id, newStatus) {
-  if (isImporting || !statusOptions.includes(newStatus)) return
-  if (!changeTicketStatus(tickets, id, newStatus)) return
+function updateTicketPriority(id, priority) {
+  if (isImporting || !priorityOptions.includes(priority)) return
+  if (!updateTicket(tickets, id, { priority })) return
 
   saveTickets(tickets)
   renderTickets()
+  return true
 }
 
-export const handleChangeStatus = (e) => {
-  if (!e.target.matches(".status-select")) return
-  updateTicketStatus(e.target.closest(".quest").dataset.id, e.target.value)
+export const handleChangeTicket = (e) => {
+  const control = e.target
+  const card = control.closest(".quest")
+  if (isImporting || !card) return
+
+  const { id } = card.dataset
+  const { value } = control
+  if (control.matches(".status-select") && statusOptions.includes(value)) {
+    if (updateTicket(tickets, id, { status: value })) saveTickets(tickets)
+  }
+
+  if (control.matches(".priority-select")) {
+    const hadFocus = control === document.activeElement
+    if (!updateTicketPriority(id, value) || !hadFocus) return
+
+    const updatedCard = Array.from(board.querySelectorAll(".quest")).find((card) => card.dataset.id === id)
+    const nextControl = updatedCard?.querySelector(".priority-select") ?? filter
+    nextControl.focus()
+  }
 }
 
 function setDropTarget(column) {
@@ -78,7 +95,7 @@ export function handleDrop(e) {
   if (!column) return
 
   e.preventDefault()
-  updateTicketStatus(draggedCard.dataset.id, column.dataset.status)
+  updateTicketPriority(draggedCard.dataset.id, column.dataset.priority)
 }
 
 export const handleAddTicket = (e) => {
@@ -114,7 +131,7 @@ export const renderTickets = () => {
   handleDragEnd()
   const filterValue = filter.value
   const filteredTickets = getFilteredTickets(tickets, filterValue)
-  const cardsByStatus = new Map(statusOptions.map((status) => [status, document.createDocumentFragment()]))
+  const cardsByPriority = new Map(priorityOptions.map((priority) => [priority, document.createDocumentFragment()]))
 
   for (const ticket of filteredTickets) {
     const card = document.createElement("article")
@@ -126,14 +143,13 @@ export const renderTickets = () => {
     title.className = "quest-title"
     title.textContent = ticket.title
 
-    const priority = document.createElement("p")
-    priority.className = "quest-priority"
+    const priority = document.createElement("select")
+    priority.className = "priority-select"
     priority.dataset.priority = ticket.priority
-    const priorityIcon = document.createElement("span")
-    priorityIcon.className = "priority-icon"
-    priorityIcon.setAttribute("aria-hidden", "true")
-    priorityIcon.textContent = priorityIcons[ticket.priority] ?? ""
-    priority.append(priorityIcon, document.createTextNode(ticket.priority))
+    priority.append(...Array.from(form.elements.priority.options, (option) => new Option(option.text, option.value)))
+    priority.setAttribute("aria-label", `Priorytet zgłoszenia: ${ticket.title}`)
+    priority.value = ticket.priority
+    priority.disabled = isImporting
 
     const status = document.createElement("select")
     status.className = "status-select"
@@ -143,13 +159,13 @@ export const renderTickets = () => {
     status.disabled = isImporting
 
     card.append(title, priority, status)
-    cardsByStatus.get(ticket.status).append(card)
+    cardsByPriority.get(ticket.priority).append(card)
   }
 
   for (const column of columns) {
-    const status = column.dataset.status
-    const cards = cardsByStatus.get(status)
-    column.hidden = filterValue !== "all" && filterValue !== status
+    const priority = column.dataset.priority
+    const cards = cardsByPriority.get(priority)
+    column.hidden = filterValue !== "all" && filterValue !== priority
     column.querySelector(".board-empty").hidden = cards.hasChildNodes()
     column.querySelector(".board-cards").replaceChildren(cards)
   }
@@ -163,7 +179,7 @@ function setImporting(importing) {
   inputFile.disabled = importing
   urlImportButton.disabled = importing
   for (const control of form.elements) control.disabled = importing
-  for (const status of board.querySelectorAll(".status-select")) status.disabled = importing
+  for (const control of board.querySelectorAll(".priority-select, .status-select")) control.disabled = importing
   for (const card of board.querySelectorAll(".quest")) card.draggable = !importing && filter.value === "all"
 }
 
